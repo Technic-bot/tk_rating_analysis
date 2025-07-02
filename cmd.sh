@@ -8,6 +8,9 @@ python rating_analysis/get_lewd_ratio.py data/tom-2023-09-1-color.csv  --time-st
 
 python rating_analysis/get_lewd_ratio.py data/2024/tom-2024-01-30.csv --time-start 2015-09-01 --time-stop 2023-09-01 --freq 3 --prefix rating_analysis/graphs/2024/tom-2024-01-30
 
+python rating_analysis/get_lewd_ratio.py data/2025/tom-30-jun-25.csv --time-start 2015-09-01 --freq 3 --title "All Art" --prefix rating_analysis/graphs/2025/tom-2025-06-30
+
+python rating_analysis/get_lewd_ratio.py data/2025/tom-color-30-jun-25.csv --time-start 2015-09-01 --freq 3 --title "Colored Art" --prefix rating_analysis/graphs/2025/tom-color-2025-06-30
 
 
 
