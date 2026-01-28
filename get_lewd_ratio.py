@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import argparse
 
 import matplotlib.pyplot as plt
@@ -91,15 +92,17 @@ def graph_high_def(count_df,title=None):
 def graph_counts(count_df ,title=None):
   fig,ax = plt.subplots(figsize=(12,8))
 
-  QE = 3
-  spacing=365/ (12/ QE) / 2
   mon_l = mdates.MonthLocator(bymonth=[1,4,7,10])
   ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
   ax.xaxis.set_major_locator(mon_l)
+  
   # To get python native datetime: 
   # py_date = count['creation'].dt.to_pydatetime()
   x_num = mdates.date2num(count_df['creation'])
-  dates = count_df['creation']
+
+  n_series = 2
+  spacing = np.min(np.diff(x_num))
+  bar_w = spacing/(n_series)
   # Again bar uses a scalar for X axis, so can't use a simple offset
   
   # to plot multiple series
@@ -113,16 +116,16 @@ def graph_counts(count_df ,title=None):
 
   ax.set_xlabel('Date')
   ax.set_ylabel('Sketches')
-  alg='edge'
-  ax.bar(x_num, count_df['safe'], width=spacing,
+  alg='center'
+  ax.bar(x_num - bar_w/2, count_df['safe'], width=bar_w,
          align=alg, label='Safe', color='#72CDFF')
-  ax.bar(x_num + spacing, count_df['questionable'], width=spacing,
+  ax.bar(x_num + bar_w/2, count_df['questionable'], width=bar_w,
         align=alg, label='Questionable', color='#F7941D' )
   # automfmt _xdate does this too:
   ax.xaxis_date()
   plt.setp(ax.get_xticklabels(), rotation=45, ha='right')
   ax.legend()
-  ax.annotate("Graph by TecBot with ❤️  ", xy= (0.8,-0.2),
+  ax.annotate("Graph by TecBot with ❤️  ", xy= (0.8,-0.125),
               xycoords='axes fraction', fontsize=10)
   return fig
 
@@ -130,13 +133,15 @@ def graph_ratio(count_df, title=None):
   fig, ax = plt.subplots(figsize=(12,8))
   fig.autofmt_xdate()
 
-  QE = 3
-  spacing=365/ (12/QE) / 2
   mon_l = mdates.MonthLocator(bymonth=[1,4,7,10])
   ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
   ax.xaxis.set_major_locator(mon_l)
   
   x_num = mdates.date2num(count_df['creation'])
+  n_series = 1
+  spacing = np.min(np.diff(x_num))
+  bar_w = spacing/(n_series*1.2)
+
   header = 'Safe and Questionable sketches by percent over time'
   if title:
     header += ':\n' + title  
@@ -146,9 +151,9 @@ def graph_ratio(count_df, title=None):
   safe_ratio = count_df['safe_ratio'] 
   quest_ratio = count_df['quest_ratio'] 
   align='edge'
-  ax.bar(x_num,quest_ratio,width=spacing, bottom=safe_ratio,
+  ax.bar(x_num, quest_ratio, width=bar_w, bottom=safe_ratio,
         align=align, label='Questionable', color='#F7941D' )
-  ax.bar(x_num, safe_ratio, width=spacing,
+  ax.bar(x_num, safe_ratio, width=bar_w,
          align=align, label='Safe',color='#72CDFF')
 
   ax.annotate("Graph by TecBot with ❤️  ", xy= (0.8,-0.2),
@@ -182,15 +187,9 @@ if __name__ == '__main__':
   df = process_file(args.file,args.time_start,args.time_stop)
   counts = group_df(df,args.freq)
   cnt_fig = graph_counts(counts, args.title)
-  ratio_fig =  graph_ratio(counts, args.title)
-  lewd_fig =  graph_lewd(counts, args.title)
-
-  #cnt_hd = group_high_def(df)
-  #fig_hd = graph_high_def(cnt_hd)
-
+  ratio_fig = graph_ratio(counts, args.title)
   if args.prefix:
     cnt_fig.savefig(args.prefix + 'sfw-nsfw-count.png')
     ratio_fig.savefig(args.prefix + 'sfw-nsfw-ratio.png')
-    lewd_fig.savefig(args.prefix + 'lewd-ratio.png')
   else:
     plt.show()
